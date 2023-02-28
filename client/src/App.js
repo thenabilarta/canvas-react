@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 // import { useParams } from "react-router-dom";
 
 import s from "./styles.module.css";
+import data from "./data.txt";
+import axios from "axios";
 
-const Canvas = ({ imgWidth, imgHeight, imageSrc }) => {
+const Canvas = ({ imgWidth, imgHeight, imageSrc, boxData }) => {
   // const { id } = useParams();
 
   // const getItems = () => {
@@ -164,15 +166,23 @@ const Canvas = ({ imgWidth, imgHeight, imageSrc }) => {
     // const ressRef2D = ressRef.getContext("2d");
 
     context.beginPath();
-    context.rect(664, 354, 27, 50);
-    context.strokeStyle = "red";
-    context.lineWidth = 2;
-    context.stroke();
+
+    boxData.forEach((b) => {
+      context.rect(b.left, b.top, b.width, b.height);
+      context.strokeStyle = "red";
+      context.lineWidth = 2;
+      context.stroke();
+
+      drawTextBG(context, ` ${b.name} `, "14px Arial", b.left + b.width, b.top);
+      // context.textBaseline = "top";
+    });
+
+    // context.rect(664, 354, 27, 50);
+    // context.strokeStyle = "red";
+    // context.lineWidth = 2;
+    // context.stroke();
 
     // context.fillText("My text", 664, 349);
-
-    drawTextBG(context, " Hello World ", "14px Arial", 664, 336);
-    context.textBaseline = "top";
   };
 
   useEffect(() => {
@@ -213,10 +223,11 @@ const Component = () => {
   const img = new Image();
 
   const imageSrc =
-    "https://storage.googleapis.com/test-ui-development.appspot.com/ai-processing/id-25_camera-0_2023-02-24T07_05_00_0800_0000000259.jpg";
+    "https://storage.googleapis.com/test-ui-development.appspot.com/ai-processing/id-25_camera-0_2023-02-27T13_01_34_0800_0000001227.jpg";
 
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+  const [boxData, setBoxData] = useState([]);
 
   img.onload = function () {
     setWidth(this.width);
@@ -225,6 +236,13 @@ const Component = () => {
 
   img.src = imageSrc;
 
+  useEffect(() => {
+    axios.get("http://localhost:9999/data").then((res) => {
+      console.log(res.data);
+      setBoxData(res.data);
+    });
+  }, []);
+
   return (
     <div>
       <div className="row">
@@ -232,7 +250,12 @@ const Component = () => {
           className="col-xs-12 col-sm-12 col-md-12 col-lg-12"
           style={{ display: "flex", position: "relative" }}
         >
-          <Canvas imageSrc={imageSrc} imgWidth={width} imgHeight={height} />
+          <Canvas
+            imageSrc={imageSrc}
+            imgWidth={width}
+            imgHeight={height}
+            boxData={boxData}
+          />
         </div>
       </div>
     </div>
